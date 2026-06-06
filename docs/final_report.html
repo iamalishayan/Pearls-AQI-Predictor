@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final Project Report: AQI Predictor — Islamabad</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Design Tokens */
+    :root {
+      --primary: #1A365D;
+      --primary-light: #2B6CB0;
+      --accent: #E2E8F0;
+      --bg: #F7FAFC;
+      --text: #2D3748;
+      --text-muted: #718096;
+      --card-bg: #FFFFFF;
+      --border: #E2E8F0;
+      --code-bg: #F7FAFC;
+      
+      --success: #2F855A;
+      --warning: #C05621;
+      --danger: #9B2C2C;
+      --info: #2B6CB0;
+    }
+
+    /* Base Reset & Styling */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.6;
+      font-size: 11pt;
+    }
+    
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: var(--card-bg);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+      border-radius: 12px;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Headings */
+    h1, h2, h3, h4 {
+      color: var(--primary);
+      font-weight: 700;
+      line-height: 1.3;
+      margin-top: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+      margin-top: 0;
+    }
+    
+    h2 {
+      font-size: 1.6rem;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 0.3rem;
+      margin-top: 2.5rem;
+    }
+    
+    h3 {
+      font-size: 1.25rem;
+      color: var(--primary-light);
+    }
+    
+    p {
+      margin-bottom: 1.2rem;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-bottom: 1.2rem;
+      padding-left: 1.5rem;
+    }
+    
+    li {
+      margin-bottom: 0.4rem;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 10pt;
+    }
+    
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      background-color: #F8FAFC;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      font-size: 8.5pt;
+      letter-spacing: 0.5px;
+    }
+    
+    tr:hover {
+      background-color: #F8FAFC;
+    }
+
+    /* Code Blocks */
+    pre, code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    code {
+      background-color: var(--code-bg);
+      color: #D53F8C;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 9.5pt;
+    }
+    
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+    
+    pre code {
+      background-color: transparent;
+      color: var(--text);
+      padding: 0;
+      font-size: 9pt;
+      display: block;
+    }
+
+    /* Utilities / Components */
+    .divider {
+      height: 2px;
+      background-color: var(--accent);
+      margin: 2rem 0;
+    }
+    
+    .meta-table td {
+      border: none;
+      padding: 0.4rem 0;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+
+    /* Cover Page styling for Web */
+    .cover-page {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+      text-align: center;
+      background: linear-gradient(135deg, #1A365D 0%, #2A4365 100%);
+      color: white;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+    
+    .cover-page h1 {
+      color: white;
+      border-bottom: none;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 800;
+    }
+    
+    .cover-page h2 {
+      color: #90CDF4;
+      border-bottom: none;
+      font-size: 1.5rem;
+      margin-top: 0;
+      margin-bottom: 3rem;
+      font-weight: 400;
+    }
+    
+    .cover-meta {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background-color: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+    }
+    
+    .cover-meta p {
+      margin-bottom: 0.5rem;
+      font-size: 11pt;
+    }
+    
+    .cover-meta p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .cover-links {
+      margin-top: 2rem;
+      font-size: 9.5pt;
+      color: #E2E8F0;
+    }
+    
+    .cover-links a {
+      color: #63B3ED;
+      text-decoration: none;
+    }
+    
+    .cover-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* Architecture SVG Wrapper */
+    .architecture-container {
+      background-color: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .architecture-svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Alert Boxes (Callouts) */
+    .alert-box {
+      border-left: 4px solid;
+      padding: 1rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+      background-color: #F7FAFC;
+    }
+    
+    .alert-danger {
+      border-left-color: var(--danger);
+      background-color: #FFF5F5;
+      color: #742A2A;
+    }
+    
+    .alert-warning {
+      border-left-color: var(--warning);
+      background-color: #FFFAF0;
+      color: #7B341E;
+    }
+    
+    .alert-success {
+      border-left-color: var(--success);
+      background-color: #F0FFF4;
+      color: #276749;
+    }
+
+    /* Print styling rules */
+    @media print {
+      body {
+        background-color: #FFFFFF;
+        color: #000000;
+        font-size: 10pt;
+      }
+      
+      .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      
+      .cover-page {
+        height: 250mm; /* A4 height is 297mm */
+        page-break-after: always;
+        background: none !important;
+        color: black;
+        border-radius: 0;
+        border: 1px solid var(--border);
+        justify-content: space-between;
+        padding: 30mm 15mm;
+      }
+      
+      .cover-page h1 {
+        color: var(--primary);
+        font-size: 24pt;
+      }
+      
+      .cover-page h2 {
+        color: var(--primary-light);
+        font-size: 16pt;
+        margin-bottom: 50mm;
+      }
+      
+      .cover-meta {
+        background-color: transparent;
+        border: none;
+        color: black;
+      }
+      
+      .cover-links {
+        color: #4A5568;
+      }
+      
+      .cover-links a {
+        color: var(--primary-light);
+      }
+      
+      h2 {
+        page-break-before: always;
+      }
+      
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+      
+      table, pre, tr, img, svg {
+        page-break-inside: avoid;
+      }
+      
+      .no-print {
+        display: none;
+      }
+      
+      @page {
+        size: A4;
+        margin: 20mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+  
+    <!-- Cover Page -->
+    <div class="cover-page">
+      <div>
+        <h1>Air Quality Index (AQI) Forecasting System for Islamabad, Pakistan</h1>
+        <h2>A Production-Grade MLOps System Report</h2>
+      </div>
+      
+      <div class="cover-meta">
+        <p><strong>Author:</strong> Ali Shayan</p>
+        <p><strong>Organization:</strong> 10Pearls — Internship Program</p>
+        <p><strong>Date:</strong> June 2026</p>
+        <p><strong>Version:</strong> 1.0</p>
+      </div>
+      
+      <div class="cover-links">
+        <p><strong>Live Dashboard:</strong> <a href="https://aqi-predictor.onrender.com" target="_blank">https://aqi-predictor.onrender.com</a></p>
+        <p><strong>GitHub Repository:</strong> <a href="https://github.com/iamalishayan/Pearls-AQI-Predictor" target="_blank">https://github.com/iamalishayan/Pearls-AQI-Predictor</a></p>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <h2>1. Project Overview & Objectives</h2>
+    <p>The goal of this project was to build a production-grade, end-to-end Air Quality Index (AQI) forecasting system for Islamabad, Pakistan. Air pollution is a critical public health concern in South Asian cities, and accurate short-term forecasts can help citizens and authorities make informed decisions about outdoor activities, school closures, and health advisories.</p>
+    
+    <h3>Objectives</h3>
+    <ul>
+      <li><strong>Predict PM<sub>2.5</sub> concentration</strong> (the most harmful fine particulate matter) over a 3-day forecast horizon (+24h, +48h, +72h).</li>
+      <li><strong>Train multiple ML models</strong> (Ridge Regression, Random Forest, XGBoost) and automatically select the best performer per horizon using rigorous cross-validation.</li>
+      <li><strong>Experiment with deep learning</strong> (LSTM, GRU) to compare against traditional ensemble methods and document findings.</li>
+      <li><strong>Deploy a fully automated MLOps pipeline</strong> where new data is ingested hourly, models are retrained daily, and predictions are served via a live web dashboard.</li>
+      <li><strong>Provide SHAP-based explainability</strong> so users can understand <em>why</em> the model predicts a specific AQI, not just <em>what</em> it predicts.</li>
+      <li><strong>Implement health alerts</strong> that dynamically fire when predicted AQI crosses EPA-defined hazardous thresholds.</li>
+    </ul>
+
+    <h3>Key Principles</h3>
+    <ul>
+      <li><strong>No local data storage:</strong> All features and models are stored in Hopsworks Feature Store and Model Registry — the single source of truth.</li>
+      <li><strong>Reproducibility:</strong> Every training run is logged in MLflow with full hyperparameter and metric tracking.</li>
+      <li><strong>Modularity:</strong> The codebase is cleanly separated into independent pipelines (feature, backfill, training, inference) connected only through the Feature Store.</li>
+    </ul>
+
+    <!-- Section 2 -->
+    <h2>2. Architecture & Design Decisions</h2>
+    <p>The system follows a modern <strong>Serverless MLOps</strong> architecture, built on a clear separation of concerns:</p>
+    
+    <div class="architecture-container">
+      <svg viewBox="0 0 700 290" class="architecture-svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2b6cb0"/>
+          </marker>
+          <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1" flood-color="#000"/>
+          </filter>
+        </defs>
+        <style>
+          .node { fill: #f7fafc; stroke: #2b6cb0; stroke-width: 1.5; rx: 6px; }
+          .node-special { fill: #ebf8ff; stroke: #1a365d; stroke-width: 2; rx: 6px; }
+          .label { font-family: 'Inter', sans-serif; font-size: 11px; fill: #2d3748; font-weight: 600; text-anchor: middle; }
+          .title { font-family: 'Inter', sans-serif; font-size: 10px; fill: #718096; text-anchor: middle; }
+          .flow-line { fill: none; stroke: #2b6cb0; stroke-width: 2; marker-end: url(#arrow); }
+          .flow-line-double { fill: none; stroke: #2b6cb0; stroke-width: 2; marker-end: url(#arrow); marker-start: url(#arrow); }
+        </style>
+        
+        <!-- Row 1 Nodes -->
+        <g filter="url(#shadow)">
+          <rect x="10" y="20" width="150" height="50" class="node" />
+          <text x="85" y="42" class="label">External APIs</text>
+          <text x="85" y="56" class="title">Open-Meteo &amp; AQICN</text>
+        </g>
+        <g filter="url(#shadow)">
+          <rect x="230" y="20" width="150" height="50" class="node-special" />
+          <text x="305" y="42" class="label" fill="#1a365d">Feature Pipeline</text>
+          <text x="305" y="56" class="title">Hourly CI/CD (GitHub)</text>
+        </g>
+        <g filter="url(#shadow)">
+          <rect x="450" y="20" width="150" height="50" class="node" />
+          <text x="525" y="42" class="label">Feature Store</text>
+          <text x="525" y="56" class="title">Hopsworks V4 Group</text>
+        </g>
+
+        <!-- Row 2 Nodes -->
+        <g filter="url(#shadow)">
+          <rect x="230" y="110" width="150" height="50" class="node" />
+          <text x="305" y="132" class="label">Model Registry</text>
+          <text x="305" y="146" class="title">Hopsworks Storage</text>
+        </g>
+        <g filter="url(#shadow)">
+          <rect x="450" y="110" width="150" height="50" class="node-special" />
+          <text x="525" y="132" class="label" fill="#1a365d">Training Pipeline</text>
+          <text x="525" y="146" class="title">Daily CI/CD (GitHub)</text>
+        </g>
+
+        <!-- Row 3 Nodes -->
+        <g filter="url(#shadow)">
+          <rect x="230" y="200" width="150" height="50" class="node" />
+          <text x="305" y="222" class="label">FastAPI Backend</text>
+          <text x="305" y="236" class="title">Inference &amp; SHAP</text>
+        </g>
+        <g filter="url(#shadow)">
+          <rect x="450" y="200" width="150" height="50" class="node" />
+          <text x="525" y="222" class="label">Streamlit Dashboard</text>
+          <text x="525" y="236" class="title">Docker User Interface</text>
+        </g>
+
+        <!-- Connecting Arrows -->
+        <path d="M 160 45 L 222 45" class="flow-line" />
+        <path d="M 380 45 L 442 45" class="flow-line" />
+        <path d="M 525 70 L 525 102" class="flow-line" />
+        <path d="M 450 135 L 388 135" class="flow-line" />
+        <path d="M 305 160 L 305 192" class="flow-line" />
+        <path d="M 380 225 L 442 225" class="flow-line-double" />
+      </svg>
+    </div>
+
+    <h3>Design Decisions</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 30%;">Decision</th>
+          <th>Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Hopsworks as Feature Store</strong></td>
+          <td>Eliminates fragile local CSV files. Provides schema validation, versioning, and online/offline stores for both training and serving.</td>
+        </tr>
+        <tr>
+          <td><strong>Separate Feature &amp; Training Pipelines</strong></td>
+          <td>Decouples data ingestion from model training, allowing independent scaling and scheduling.</td>
+        </tr>
+        <tr>
+          <td><strong>FastAPI + Streamlit Microservices</strong></td>
+          <td>FastAPI handles computationally heavy inference and SHAP calculations, while Streamlit provides an interactive, user-friendly UI.</td>
+        </tr>
+        <tr>
+          <td><strong>Docker Containerization</strong></td>
+          <td>Both services are containerized to eliminate environment mismatches and enable straightforward production deployment.</td>
+        </tr>
+        <tr>
+          <td><strong>GitHub Actions CI/CD</strong></td>
+          <td>Hourly feature ingestion and daily model retraining are fully automated via cron-triggered workflows.</td>
+        </tr>
+        <tr>
+          <td><strong>SHAP over LIME</strong></td>
+          <td>SHAP provides mathematically consistent Shapley values with native TreeExplainer support for our production models (Random Forest, XGBoost).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 3 -->
+    <h2>3. Data Sources &amp; Preprocessing</h2>
+    <h3>Data Sources</h3>
+    <p>All data is sourced dynamically from <strong>Open-Meteo's</strong> free, open-source APIs:</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 25%;">API</th>
+          <th style="width: 35%;">Variables</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Air Quality API</strong></td>
+          <td>PM<sub>2.5</sub>, PM<sub>10</sub>, CO, NO<sub>2</sub>, SO<sub>2</sub>, O<sub>3</sub></td>
+          <td>Target variable and pollutant features</td>
+        </tr>
+        <tr>
+          <td><strong>Weather Archive API</strong></td>
+          <td>Temperature, Humidity, Pressure, Wind Speed, Precipitation</td>
+          <td>Meteorological drivers of pollution dispersion</td>
+        </tr>
+        <tr>
+          <td><strong>AQICN API</strong></td>
+          <td>Live AQI</td>
+          <td>"Reality check" comparison on the dashboard</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Preprocessing Steps</h3>
+    <ol>
+      <li><strong>Temporal Alignment:</strong> Both weather and air quality data are fetched at hourly granularity, merged on exact timestamps, and sorted chronologically.</li>
+      <li><strong>Missing Value Handling:</strong> Forward-filling (<code>ffill</code>) is applied to handle any gaps in sensor readings, as pollution levels change gradually.</li>
+      <li><strong>Type Casting:</strong> Integer columns (<code>hour</code>, <code>day_of_week</code>, <code>month</code>, <code>is_weekend</code>, <code>is_night</code>) are cast to <code>int32</code> for Hopsworks schema compatibility. Float columns are standardized to <code>float64</code>.</li>
+      <li><strong>Timezone Normalization:</strong> All timestamps are converted to UTC and then localized to naive datetimes for consistent Feature Store storage.</li>
+    </ol>
+
+    <h3>Backfill Pipeline</h3>
+    <p>Historical data spanning <strong>90 days</strong> (approximately 2,184 hourly rows) was ingested via a dedicated <code>backfill_pipeline.py</code> script. This one-time script fetches, engineers features for, and uploads the entire historical dataset to Hopsworks Feature Group V4.</p>
+
+    <!-- Section 4 -->
+    <h2>4. Feature Engineering Methodology</h2>
+    <p>Feature engineering was the single most impactful step in improving model accuracy. Every engineered feature was <strong>mathematically justified</strong> through the EDA notebook (<code>notebooks/01_eda.ipynb</code>).</p>
+    
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 20%;">Feature</th>
+          <th style="width: 15%;">Type</th>
+          <th style="width: 30%;">Description</th>
+          <th>Justification</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>hour</code></td>
+          <td>Temporal</td>
+          <td>Hour of day (0-23)</td>
+          <td>PM<sub>2.5</sub> shows strong diurnal patterns (nighttime inversion traps pollutants)</td>
+        </tr>
+        <tr>
+          <td><code>day_of_week</code></td>
+          <td>Temporal</td>
+          <td>Day (0=Mon, 6=Sun)</td>
+          <td>Traffic patterns vary by workday vs. weekend</td>
+        </tr>
+        <tr>
+          <td><code>month</code></td>
+          <td>Temporal</td>
+          <td>Month (1-12)</td>
+          <td>Seasonal patterns (winter smog, monsoon washout)</td>
+        </tr>
+        <tr>
+          <td><code>is_weekend</code></td>
+          <td>Binary</td>
+          <td>1 if Saturday/Sunday</td>
+          <td>Reduced industrial/traffic emissions on weekends</td>
+        </tr>
+        <tr>
+          <td><code>is_night</code></td>
+          <td>Binary</td>
+          <td>1 if hour &ge; 20 or &lt; 6</td>
+          <td>Atmospheric inversion traps pollutants at night</td>
+        </tr>
+        <tr>
+          <td><code>pm25_lag_1h</code></td>
+          <td>Lag</td>
+          <td>PM<sub>2.5</sub> value 1 hour ago</td>
+          <td>Short-term momentum of pollution levels</td>
+        </tr>
+        <tr>
+          <td><code>pm25_lag_6h</code></td>
+          <td>Lag</td>
+          <td>PM<sub>2.5</sub> value 6 hours ago</td>
+          <td>Medium-term trend tracking</td>
+        </tr>
+        <tr>
+          <td><code>pm25_lag_24h</code></td>
+          <td>Lag</td>
+          <td>PM<sub>2.5</sub> value 24 hours ago</td>
+          <td>Captures the dominant 24h autocorrelation cycle</td>
+        </tr>
+        <tr>
+          <td><code>pm25_change_24h</code></td>
+          <td>Delta</td>
+          <td><code>pm25 - pm25_lag_24h</code></td>
+          <td>Rate of change; detects pollution spikes vs. declines</td>
+        </tr>
+        <tr>
+          <td><code>pm25_rolling_mean_24h</code></td>
+          <td>Rolling</td>
+          <td>24h rolling average of PM<sub>2.5</sub></td>
+          <td>Smooths sensor noise and micro-fluctuations</td>
+        </tr>
+        <tr>
+          <td><code>temp_trend_6h</code></td>
+          <td>Trend</td>
+          <td>Temperature change over 6 hours</td>
+          <td>Temperature inversions directly affect pollutant trapping</td>
+        </tr>
+        <tr>
+          <td><code>heat_index</code></td>
+          <td>Interaction</td>
+          <td><code>temp &times; humidity / 100</code></td>
+          <td>Combined thermal stress indicator</td>
+        </tr>
+        <tr>
+          <td><code>humidity_wind</code></td>
+          <td>Interaction</td>
+          <td><code>humidity &times; wind_speed</code></td>
+          <td>Captures moisture-driven dispersion effects</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Feature Store Versioning</h3>
+    <ul>
+      <li><strong>V3:</strong> Original feature set with lag features and rolling statistics.</li>
+      <li><strong>V4 (current):</strong> Added <code>pm25_change_24h</code> (AQI change-rate feature). The schema migration required creating a new Feature Group version and re-running the backfill pipeline.</li>
+    </ul>
+
+    <!-- Section 5 -->
+    <h2>5. Exploratory Data Analysis (EDA)</h2>
+    <p>A comprehensive EDA was performed in <code>notebooks/01_eda.ipynb</code> to validate assumptions and guide feature engineering. Key findings:</p>
+    
+    <h3>5.1 Target Distribution</h3>
+    <p>PM<sub>2.5</sub> is <strong>heavily right-skewed</strong> with a long tail of extreme pollution events. This is typical for pollutant data and strongly favors tree-based models (Random Forest, XGBoost) over linear models, since tree-based algorithms are inherently robust to non-normal distributions.</p>
+    
+    <h3>5.2 Temporal Patterns</h3>
+    <ul>
+      <li><strong>Diurnal Cycle:</strong> PM<sub>2.5</sub> peaks between 8-10 PM and again at 6-8 AM (rush hour + nighttime inversion), confirming the importance of <code>hour</code> and <code>is_night</code> features.</li>
+      <li><strong>Weekend Effect:</strong> Average PM<sub>2.5</sub> is measurably lower on weekends due to reduced industrial activity and traffic.</li>
+      <li><strong>Seasonal Variation:</strong> March-April shows higher pollution (pre-monsoon dry season), while June shows lower levels (monsoon washout).</li>
+    </ul>
+
+    <h3>5.3 Feature Correlations</h3>
+    <ul>
+      <li><strong>PM<sub>10</sub> and CO</strong> are highly correlated with PM<sub>2.5</sub> (&rho; &gt; 0.7), as they share common emission sources.</li>
+      <li><strong>Wind speed</strong> has a slight negative correlation (&rho; &approx; -0.15), confirming that wind disperses pollutants.</li>
+      <li><strong>Humidity</strong> shows a weak positive correlation, as moisture can trap particulate matter.</li>
+    </ul>
+
+    <h3>5.4 Autocorrelation Analysis (Key Finding)</h3>
+    <p>The ACF (Autocorrelation Function) plot revealed a <strong>massive spike in correlation at exactly 24-hour intervals</strong> (lag=24, 48, 72). This is the mathematical "smoking gun" that proves adding <code>pm25_lag_24h</code> as a feature is highly predictive, and a 3-day forecasting architecture (+24h, +48h, +72h) is viable.</p>
+
+    <h3>5.5 Outlier Detection</h3>
+    <p>Extreme pollution events (PM<sub>2.5</sub> &gt; 200 &mu;g/m³) were identified but <strong>not removed</strong>, as they represent real hazardous air quality episodes that the model must learn to predict.</p>
+
+    <!-- Section 6 -->
+    <h2>6. Model Selection &amp; Evaluation Results</h2>
+    <p>Three production models are trained for each forecast horizon using <strong>TimeSeriesSplit cross-validation</strong> to prevent data leakage:</p>
+    <ul>
+      <li><strong>Ridge Regression:</strong> Linear (L2 regularized) baseline.</li>
+      <li><strong>Random Forest:</strong> Bagged decision trees. Robust to noise, handles non-linear relationships.</li>
+      <li><strong>XGBoost:</strong> Gradient boosted trees. Highest accuracy on tabular data.</li>
+    </ul>
+
+    <h3>Results</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Horizon</th>
+          <th>Best Model</th>
+          <th>RMSE (&mu;g/m³)</th>
+          <th>R²</th>
+          <th>Runner-up (RMSE)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>+24h</strong></td>
+          <td>Random Forest</td>
+          <td>~13.4</td>
+          <td>0.82</td>
+          <td>XGBoost (13.9)</td>
+        </tr>
+        <tr>
+          <td><strong>+48h</strong></td>
+          <td>Random Forest</td>
+          <td>~13.4</td>
+          <td>0.31</td>
+          <td>Ridge (13.6)</td>
+        </tr>
+        <tr>
+          <td><strong>+72h</strong></td>
+          <td>Ridge Regression</td>
+          <td>~15.6</td>
+          <td>0.06</td>
+          <td>Random Forest (16.0)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Key Insight:</strong> Predictive power naturally decays as the forecast horizon extends. This reflects the chaotic nature of atmospheric dynamics. The 24h model achieves a strong R² of 0.82, proving the system is production-viable for short-term forecasts.</p>
+
+    <!-- Section 7 -->
+    <h2>7. Deep Learning Experiments (LSTM/GRU)</h2>
+    <p>Documented in <code>notebooks/02_lstm_experiments.ipynb</code>, these experiments formally evaluated whether deep learning could outperform tree-based models.</p>
+    
+    <h3>Results Comparison</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>RMSE (&mu;g/m³)</th>
+          <th>MAE (&mu;g/m³)</th>
+          <th>R²</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>LSTM</strong></td>
+          <td>13.69</td>
+          <td>11.28</td>
+          <td>0.38</td>
+        </tr>
+        <tr>
+          <td><strong>GRU</strong></td>
+          <td>~14.1</td>
+          <td>~11.5</td>
+          <td>~0.34</td>
+        </tr>
+        <tr>
+          <td><strong>Random Forest</strong></td>
+          <td>~13.4</td>
+          <td>~10.8</td>
+          <td>0.82</td>
+        </tr>
+        <tr>
+          <td><strong>XGBoost</strong></td>
+          <td>~13.9</td>
+          <td>~11.2</td>
+          <td>0.81</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Why Tree-Based Models Win</h3>
+    <ol>
+      <li><strong>Data Size:</strong> With only ~3,000 training samples, deep learning models cannot learn the complex temporal patterns that tree-based models capture via handcrafted lag features.</li>
+      <li><strong>Explainability:</strong> Random Forest and XGBoost natively support SHAP TreeExplainer, providing instant feature importance. LSTM requires slower, approximate SHAP methods.</li>
+      <li><strong>Training Speed:</strong> Tree models train in seconds; LSTM requires minutes and GPU-friendly infrastructure.</li>
+      <li><strong>Feature Engineering Synergy:</strong> Our manually engineered lag features (<code>pm25_lag_24h</code>, <code>pm25_rolling_mean_24h</code>) give tree models direct access to the dominant 24h autocorrelation pattern, whereas LSTMs must re-learn this from raw sequences.</li>
+    </ol>
+
+    <!-- Section 8 -->
+    <h2>8. Pipeline Automation &amp; CI/CD</h2>
+    <p>The system runs entirely serverless and automated via GitHub Actions workflows:</p>
+    <ul>
+      <li><strong>Feature Pipeline (<code>src/feature_pipeline.py</code>):</strong> Runs hourly (<code>0 * * * *</code>). Ingests real-time Open-Meteo readings and updates Hopsworks.</li>
+      <li><strong>Training Pipeline (<code>src/training_pipeline.py</code>):</strong> Runs daily at midnight UTC (<code>0 0 * * *</code>). Retrieves data from the offline store, trains multiple models, selects the best one, logs to MLflow, and registers it to Hopsworks.</li>
+      <li><strong>Backfill Pipeline (<code>src/backfill_pipeline.py</code>):</strong> Manually triggered script to seed the feature store with 90 days of historical data.</li>
+    </ul>
+
+    <!-- Section 9 -->
+    <h2>9. Dashboard Features &amp; Usage</h2>
+    <p>The Streamlit dashboard serves as the user-facing interface:</p>
+    <ul>
+      <li><strong>3-Day Forecast Cards:</strong> Displays the predicted PM<sub>2.5</sub> and color-coded AQI category.</li>
+      <li><strong>Reality Check:</strong> Pulls the live AQI from the AQICN station in Islamabad to display beside forecasts.</li>
+      <li><strong>SHAP Explanations:</strong> Displays Plotly charts showing exactly which weather features or lags drove the predictions.</li>
+      <li><strong>Health Alert Banner:</strong> Automatically outputs EPA warnings depending on the AQI.</li>
+    </ul>
+
+    <!-- Section 10 -->
+    <h2>10. Alerting System</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>AQI Range</th>
+          <th>Level</th>
+          <th>Alert Active?</th>
+          <th>Recommended Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background-color: #F0FFF4;">
+          <td>0–100</td>
+          <td>Good / Moderate</td>
+          <td>❌ No</td>
+          <td>None</td>
+        </tr>
+        <tr style="background-color: #FFFAF0;">
+          <td>101–150</td>
+          <td>WARNING</td>
+          <td>✅ Yes</td>
+          <td>Sensitive groups should limit prolonged exertion</td>
+        </tr>
+        <tr style="background-color: #FFF5F5; color: #9B2C2C;">
+          <td>151–200</td>
+          <td>HIGH</td>
+          <td>✅ Yes</td>
+          <td>Everyone may begin to experience health effects</td>
+        </tr>
+        <tr style="background-color: #FED7D7; color: #9B2C2C;">
+          <td>201–300</td>
+          <td>CRITICAL</td>
+          <td>✅ Yes</td>
+          <td>Everyone should avoid prolonged or heavy exertion</td>
+        </tr>
+        <tr style="background-color: #FEB2B2; color: #9B2C2C; font-weight: bold;">
+          <td>301–500</td>
+          <td>EMERGENCY</td>
+          <td>✅ Yes</td>
+          <td>Everyone should avoid <strong>all</strong> outdoor exertion</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 11 -->
+    <h2>11. Deployment &amp; Port Routing</h2>
+    <p>The system is containerized and deployed on <strong>Render</strong>. Because Render's Free tier only maps external traffic to a single dynamic port, we modified our <code>Dockerfile</code> to route the Streamlit dashboard on the external <code>$PORT</code> assigned by Render, while the FastAPI backend runs on internal port <code>8000</code>. Streamlit queries FastAPI on <code>http://localhost:8000</code> inside the container.</p>
+    
+    <pre><code># Excerpt of Dockerfile CMD:
+CMD uvicorn src.app.api:app --host 0.0.0.0 --port 8000 &amp; \
+    streamlit run src/app/dashboard.py --server.port=${PORT:-8501} --server.address=0.0.0.0</code></pre>
+
+    <!-- Section 12 -->
+    <h2>12. Testing &amp; Quality Assurance</h2>
+    <p>The project contains <strong>20 automated unit tests</strong> that cover core modules without needing database/API access (using mocks):</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 30%;">Test Module</th>
+          <th style="width: 15%;">Tests</th>
+          <th>Coverage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>test_api.py</code></td>
+          <td>2</td>
+          <td>FastAPI endpoint integrity (<code>/</code>, <code>/health</code>)</td>
+        </tr>
+        <tr>
+          <td><code>test_feature_pipeline.py</code></td>
+          <td>7</td>
+          <td>AQI classification, PM2.5-to-AQI conversion, time calculations</td>
+        </tr>
+        <tr>
+          <td><code>test_inference.py</code></td>
+          <td>5</td>
+          <td>Alert system thresholds, AQI conversion roundtrip</td>
+        </tr>
+        <tr>
+          <td><code>test_training_pipeline.py</code></td>
+          <td>3</td>
+          <td>Config parameters, target shift logic</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 13 -->
+    <h2>13. Challenges &amp; Solutions</h2>
+    <ul>
+      <li><strong>Challenge 1: Docker Dependency Conflicts:</strong> <code>pip freeze</code> generated local macOS platform specific constraints. <em>Solution:</em> Refactored <code>requirements.txt</code> to only list top-level packages, letting pip figure out the compatibility inside the Linux container.</li>
+      <li><strong>Challenge 2: Hopsworks Schema Evolution:</strong> Adding <code>pm25_change_24h</code> caused mismatch errors. <em>Solution:</em> Upgraded Hopsworks group version to V4, re-backfilled the store, and implemented materialization checks in code.</li>
+      <li><strong>Challenge 3: Hopsworks Materialization Timing:</strong> Ingested data took minutes to reflect offline. <em>Solution:</em> Programmatically queried the Hudi materialization job state using the SDK to ensure training only starts after writing completes.</li>
+    </ul>
+
+    <!-- Section 15 -->
+    <h2>15. Appendix</h2>
+    <h3>Repository Structure</h3>
+    <pre><code>├── .github/workflows/           # CI/CD (hourly feature, daily training)
+├── Dockerfile                   # Combined Dockerfile for Render deployment
+├── Dockerfile.app               # Dockerfile for local Docker Compose
+├── docker-compose.yml           # Local multi-service configuration
+├── render.yaml                  # Render deployment blueprint
+├── requirements.txt             # Python dependencies
+├── docs/                        # Architecture docs &amp; reports
+├── src/                         # Python Source Code
+│   ├── feature_pipeline.py      # Hourly ingestion
+│   ├── training_pipeline.py     # Daily training
+│   ├── inference.py             # Model prediction
+│   ├── explainability.py        # SHAP explainers
+│   ├── alerts.py                # Alert rules
+│   ├── config.py                # System settings
+│   └── app/                     
+│       ├── api.py               # FastAPI backend
+│       └── dashboard.py         # Streamlit dashboard</code></pre>
+
+    <h3>Tech Stack Summary</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 30%;">Component</th>
+          <th>Selected Technology</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ML Algorithms</td>
+          <td>Scikit-learn, XGBoost</td>
+        </tr>
+        <tr>
+          <td>Feature Store</td>
+          <td>Hopsworks (V4 Feature Group)</td>
+        </tr>
+        <tr>
+          <td>Experiment Tracking</td>
+          <td>MLflow</td>
+        </tr>
+        <tr>
+          <td>API Backend</td>
+          <td>FastAPI (Port 8000)</td>
+        </tr>
+        <tr>
+          <td>Frontend UI</td>
+          <td>Streamlit (Port 8501 / $PORT)</td>
+        </tr>
+        <tr>
+          <td>CI/CD</td>
+          <td>GitHub Actions</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</body>
+</html>
