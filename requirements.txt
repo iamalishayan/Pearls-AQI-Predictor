@@ -6,7 +6,7 @@ numpy
 scikit-learn
 xgboost
 shap
-hopsworks
+hopsworks[python]
 openmeteo-requests
 requests-cache
 retry-requests
