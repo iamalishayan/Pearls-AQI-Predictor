@@ -7,6 +7,7 @@ scikit-learn
 xgboost
 shap
 hopsworks[python]
+confluent-kafka
 openmeteo-requests
 requests-cache
 retry-requests
