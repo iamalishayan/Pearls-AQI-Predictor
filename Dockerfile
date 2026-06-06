@@ -19,12 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project source code
 COPY src/ /app/src/
 
-# Expose ports: 8000 (FastAPI) and 8501 (Streamlit)
-EXPOSE 8000 8501
-
-# Set API URL for Streamlit to find FastAPI in the same container
+# Set API URL for Streamlit to find FastAPI in the same container (internal network)
 ENV API_URL=http://localhost:8000
 
-# Start both services — API in background, Streamlit in foreground
+# Start both services — API in background (internal), Streamlit in foreground (public on Render's $PORT)
 CMD uvicorn src.app.api:app --host 0.0.0.0 --port 8000 & \
-    streamlit run src/app/dashboard.py --server.port=8501 --server.address=0.0.0.0 --server.headless=true
+    streamlit run src/app/dashboard.py --server.port=${PORT:-8501} --server.address=0.0.0.0 --server.headless=true
