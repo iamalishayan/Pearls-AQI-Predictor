@@ -24,10 +24,15 @@ AQICN_API_KEY = os.getenv("AQICN_API_KEY", "")
 HOPSWORKS_API_KEY = os.getenv("HOPSWORKS_API_KEY", "")
 HOPSWORKS_PROJECT_NAME = os.getenv("HOPSWORKS_PROJECT_NAME", "aqi_predictor")
 
-# Target City
-CITY_NAME = os.getenv("CITY_NAME", "islamabad")
-CITY_LAT = float(os.getenv("CITY_LAT", "33.6844"))
-CITY_LON = float(os.getenv("CITY_LON", "73.0479"))
+# Target City (Handle empty strings gracefully from CI/CD)
+_city = os.getenv("CITY_NAME", "islamabad")
+CITY_NAME = _city if _city else "islamabad"
+
+_lat = os.getenv("CITY_LAT", "33.6844")
+CITY_LAT = float(_lat) if _lat else 33.6844
+
+_lon = os.getenv("CITY_LON", "73.0479")
+CITY_LON = float(_lon) if _lon else 73.0479
 
 # AQI Thresholds (EPA Standard)
 AQI_CATEGORIES = {
