@@ -199,10 +199,7 @@ def main():
     logger.info("Phase 5: 3-Day Forecast Training Pipeline")
     logger.info("="*60)
     
-    if not MLFLOW_TRACKING_URI or "localhost:5000" in MLFLOW_TRACKING_URI:
-        mlflow.set_tracking_uri("file:./mlruns")
-    else:
-        mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     mlflow.set_experiment(f"{MLFLOW_EXPERIMENT_NAME}_3day_forecast")
 
     try:

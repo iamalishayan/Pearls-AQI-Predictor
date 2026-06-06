@@ -45,7 +45,7 @@ AQI_CATEGORIES = {
 }
 
 # MLflow
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlruns.db")
 MLFLOW_EXPERIMENT_NAME = "aqi-predictor"
 
 # Feature Pipeline
