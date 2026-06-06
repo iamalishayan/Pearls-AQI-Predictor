@@ -2,7 +2,7 @@
 
 > **3-Day Air Quality Index Forecasting System** — A fully automated, serverless ML pipeline that predicts AQI using real-time weather and pollutant data.
 
-> **🟢 Live Dashboard:** [https://aqi-predictor.onrender.com](https://aqi-predictor.onrender.com)
+> **🟢 Live Dashboard:** [https://aqi-predictor-uwpy.onrender.com/](https://aqi-predictor-uwpy.onrender.com/)
 
 [![Feature Pipeline](https://github.com/iamalishayan/Pearls-AQI-Predictor/actions/workflows/feature_pipeline.yml/badge.svg)](https://github.com/iamalishayan/Pearls-AQI-Predictor/actions/workflows/feature_pipeline.yml)
 [![Training Pipeline](https://github.com/iamalishayan/Pearls-AQI-Predictor/actions/workflows/training_pipeline.yml/badge.svg)](https://github.com/iamalishayan/Pearls-AQI-Predictor/actions/workflows/training_pipeline.yml)
@@ -91,15 +91,6 @@ docker compose up -d --build
 
 - **Streamlit Dashboard:** http://localhost:8501
 - **FastAPI Docs:** http://localhost:8000/docs
-
-### 4. Deploy to Render (Free)
-
-1. Push this repo to GitHub
-2. Go to [render.com](https://render.com) → **New** → **Web Service**
-3. Connect your GitHub repo
-4. Render auto-detects the `Dockerfile` and `render.yaml`
-5. Add environment variables: `HOPSWORKS_API_KEY`, `HOPSWORKS_PROJECT_NAME`, `AQICN_API_KEY`
-6. Deploy! Your dashboard will be live at `https://your-app.onrender.com`
 
 ## Running Tests
 
