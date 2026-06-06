@@ -1,0 +1,14 @@
+venv/
+.git/
+.cache/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+mlruns/
+models/
+data/
+*.docx
+*.pdf
+*.csv
+*.md
+.DS_Store

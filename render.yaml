@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: aqi-predictor
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: HOPSWORKS_API_KEY
+        sync: false
+      - key: HOPSWORKS_PROJECT_NAME
+        sync: false
+      - key: AQICN_API_KEY
+        sync: false
+      - key: CITY_NAME
+        value: islamabad
+      - key: CITY_LAT
+        value: "33.6844"
+      - key: CITY_LON
+        value: "73.0479"
