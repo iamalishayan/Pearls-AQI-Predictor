@@ -24,15 +24,19 @@ def get_top_drivers(model, X: pd.DataFrame, top_n: int = 5) -> list:
     # Determine the correct explainer based on model type
     if hasattr(model, 'feature_importances_'):
         explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X)
+        shap_vals = shap_values[0] if isinstance(shap_values, list) else shap_values.flatten()
+    elif hasattr(model, 'coef_'):
+        # For linear models (like Ridge), SHAP needs a background dataset.
+        # Since we only have 1 row at inference, SHAP compares it to itself and returns 0.
+        # We approximate feature impact as `coefficient * feature_value`.
+        shap_vals = (model.coef_ * X.iloc[0]).values.flatten()
     else:
-        explainer = shap.LinearExplainer(model, X)
+        explainer = shap.Explainer(model, X)
+        shap_values = explainer.shap_values(X)
+        shap_vals = shap_values[0] if isinstance(shap_values, list) else shap_values.flatten()
         
-    shap_values = explainer.shap_values(X)
-
     feature_names = X.columns.tolist()
-    
-    # Handle SHAP output shapes gracefully
-    shap_vals = shap_values[0] if isinstance(shap_values, list) else shap_values.flatten()
     
     # Get indices of top N absolute impacts
     indices = np.argsort(np.abs(shap_vals))[::-1][:top_n]

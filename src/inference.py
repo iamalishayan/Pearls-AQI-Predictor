@@ -50,7 +50,15 @@ def _load_model(horizon_label):
     mr = project.get_model_registry()
 
     model_name = f"{MODEL_NAME}_{horizon_label}"
-    hw_model = mr.get_model(model_name)
+
+    # Dynamically fetch the best model version by lowest RMSE
+    # (avoids hardcoding a version number that becomes stale after retraining)
+    try:
+        hw_model = mr.get_best_model(model_name, "rmse", "min")
+        logger.info(f"Selected best model '{model_name}' v{hw_model.version} (lowest RMSE).")
+    except Exception as e:
+        logger.warning(f"get_best_model failed ({e}), falling back to version=1.")
+        hw_model = mr.get_model(model_name, version=1)
 
     model_dir = hw_model.download()
     model_path = os.path.join(model_dir, f"forecast_model_{horizon_label}.pkl")
@@ -74,11 +82,14 @@ def fetch_recent_data() -> pd.DataFrame:
         df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
         df = df.sort_values("timestamp")
         
-        # Get last 48 hours
-        cutoff = pd.Timestamp.now(tz='UTC') - pd.Timedelta(days=2)
+        # Use a wide window (90 days) so we always find data even if the
+        # hourly feature pipeline hasn't run recently.
+        cutoff = pd.Timestamp.now(tz='UTC') - pd.Timedelta(days=90)
         df_recent = df[df["timestamp"] >= cutoff]
         
-        if len(df_recent) > 24:
+        if len(df_recent) > 2:
+            # Take only the latest 48 rows for lag calculations
+            df_recent = df_recent.tail(48)
             logger.info(f"✅ Successfully fetched {len(df_recent)} rows from Hopsworks Feature Store.")
             base_cols = ["timestamp", "pm10", "pm25", "co", "no2", "so2", "o3", 
                          "temperature", "humidity", "pressure", "wind_speed", "rain", "city_name"]
@@ -87,65 +98,73 @@ def fetch_recent_data() -> pd.DataFrame:
             else:
                 logger.warning("Hopsworks data missing base columns, falling back to Open-Meteo.")
         else:
-            logger.warning("Hopsworks returned insufficient recent data, falling back to Open-Meteo.")
+            logger.warning("Hopsworks returned insufficient data, falling back to Open-Meteo.")
     except Exception as e:
         logger.warning(f"⚠️ Failed to fetch from Hopsworks FS: {e}. Falling back to Open-Meteo API.")
 
     logger.info("Hitting Open-Meteo API directly...")
-    cache_session = requests_cache.CachedSession('.cache', expire_after=1800)  # 30 min cache
-    retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
-    openmeteo = openmeteo_requests.Client(session=retry_session)
+    try:
+        cache_session = requests_cache.CachedSession('.cache', expire_after=1800)  # 30 min cache
+        retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+        openmeteo = openmeteo_requests.Client(session=retry_session)
 
-    end_date = datetime.now(timezone.utc).date()
-    start_date = end_date - timedelta(days=2)
+        end_date = datetime.now(timezone.utc).date()
+        start_date = end_date - timedelta(days=2)
 
-    # Air Quality
-    resp_aq = openmeteo.weather_api(
-        "https://air-quality-api.open-meteo.com/v1/air-quality",
-        params={
-            "latitude": CITY_LAT, "longitude": CITY_LON,
-            "hourly": ["pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "sulphur_dioxide", "ozone"],
-            "start_date": start_date.strftime("%Y-%m-%d"),
-            "end_date": end_date.strftime("%Y-%m-%d"),
-        }
-    )[0]
+        # Air Quality
+        resp_aq = openmeteo.weather_api(
+            "https://air-quality-api.open-meteo.com/v1/air-quality",
+            params={
+                "latitude": CITY_LAT, "longitude": CITY_LON,
+                "hourly": ["pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "sulphur_dioxide", "ozone"],
+                "start_date": start_date.strftime("%Y-%m-%d"),
+                "end_date": end_date.strftime("%Y-%m-%d"),
+            }
+        )[0]
 
-    # Weather
-    resp_wx = openmeteo.weather_api(
-        "https://api.open-meteo.com/v1/forecast",
-        params={
-            "latitude": CITY_LAT, "longitude": CITY_LON,
-            "hourly": ["temperature_2m", "relative_humidity_2m", "surface_pressure", "wind_speed_10m", "precipitation"],
-            "start_date": start_date.strftime("%Y-%m-%d"),
-            "end_date": end_date.strftime("%Y-%m-%d"),
-        }
-    )[0]
+        # Weather
+        resp_wx = openmeteo.weather_api(
+            "https://api.open-meteo.com/v1/forecast",
+            params={
+                "latitude": CITY_LAT, "longitude": CITY_LON,
+                "hourly": ["temperature_2m", "relative_humidity_2m", "surface_pressure", "wind_speed_10m", "precipitation"],
+                "start_date": start_date.strftime("%Y-%m-%d"),
+                "end_date": end_date.strftime("%Y-%m-%d"),
+            }
+        )[0]
 
-    hourly_aq = resp_aq.Hourly()
-    hourly_wx = resp_wx.Hourly()
+        hourly_aq = resp_aq.Hourly()
+        hourly_wx = resp_wx.Hourly()
 
-    date_range = pd.date_range(
-        start=pd.to_datetime(hourly_aq.Time(), unit="s", utc=True),
-        end=pd.to_datetime(hourly_aq.TimeEnd(), unit="s", utc=True),
-        freq=pd.Timedelta(seconds=hourly_aq.Interval()),
-        inclusive="left"
-    )
+        date_range = pd.date_range(
+            start=pd.to_datetime(hourly_aq.Time(), unit="s", utc=True),
+            end=pd.to_datetime(hourly_aq.TimeEnd(), unit="s", utc=True),
+            freq=pd.Timedelta(seconds=hourly_aq.Interval()),
+            inclusive="left"
+        )
 
-    df = pd.DataFrame({"timestamp": date_range})
-    df["pm10"] = hourly_aq.Variables(0).ValuesAsNumpy()
-    df["pm25"] = hourly_aq.Variables(1).ValuesAsNumpy()
-    df["co"] = hourly_aq.Variables(2).ValuesAsNumpy()
-    df["no2"] = hourly_aq.Variables(3).ValuesAsNumpy()
-    df["so2"] = hourly_aq.Variables(4).ValuesAsNumpy()
-    df["o3"] = hourly_aq.Variables(5).ValuesAsNumpy()
-    df["temperature"] = hourly_wx.Variables(0).ValuesAsNumpy()
-    df["humidity"] = hourly_wx.Variables(1).ValuesAsNumpy()
-    df["pressure"] = hourly_wx.Variables(2).ValuesAsNumpy()
-    df["wind_speed"] = hourly_wx.Variables(3).ValuesAsNumpy()
-    df["rain"] = hourly_wx.Variables(4).ValuesAsNumpy()
-    df["city_name"] = CITY_NAME
+        df = pd.DataFrame({"timestamp": date_range})
+        df["pm10"] = hourly_aq.Variables(0).ValuesAsNumpy()
+        df["pm25"] = hourly_aq.Variables(1).ValuesAsNumpy()
+        df["co"] = hourly_aq.Variables(2).ValuesAsNumpy()
+        df["no2"] = hourly_aq.Variables(3).ValuesAsNumpy()
+        df["so2"] = hourly_aq.Variables(4).ValuesAsNumpy()
+        df["o3"] = hourly_aq.Variables(5).ValuesAsNumpy()
+        df["temperature"] = hourly_wx.Variables(0).ValuesAsNumpy()
+        df["humidity"] = hourly_wx.Variables(1).ValuesAsNumpy()
+        df["pressure"] = hourly_wx.Variables(2).ValuesAsNumpy()
+        df["wind_speed"] = hourly_wx.Variables(3).ValuesAsNumpy()
+        df["rain"] = hourly_wx.Variables(4).ValuesAsNumpy()
+        df["city_name"] = CITY_NAME
 
-    return df
+        return df
+
+    except Exception as e:
+        logger.error(f"❌ Open-Meteo API also failed: {e}")
+        raise RuntimeError(
+            "Could not fetch data from either Hopsworks or Open-Meteo. "
+            "Open-Meteo may have hit its daily API rate limit. Please try again later."
+        )
 
 def _engineer_inference_features(df: pd.DataFrame) -> pd.DataFrame:
     """Mirror the training feature engineering exactly."""
